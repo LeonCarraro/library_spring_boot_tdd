@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
@@ -21,7 +22,7 @@ public class BookController {
     private final BookService bookService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<BookResponseDTO> create(@RequestBody BookRequestDTO bookRequest) {
+    public ResponseEntity<BookResponseDTO> create(@RequestBody @Valid BookRequestDTO bookRequest) {
         BookResponseDTO bookResponse = bookService.create(bookRequest);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leoncarraro.library_api.dto.BookRequestDTO;
 import com.leoncarraro.library_api.dto.BookResponseDTO;
 import com.leoncarraro.library_api.service.BookService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,6 +59,23 @@ public class BookControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("author").value(bookRequest.getAuthor()))
                 .andExpect(MockMvcResultMatchers.jsonPath("isbn").value(bookRequest.getIsbn()))
                 .andExpect(MockMvcResultMatchers.header().string("Location", "http://localhost/api/books/1"));
+    }
+
+    @Test
+    @DisplayName(value = "Should throw an exception when try to create one invalid Book")
+    public void shouldThrowAnExceptionWhenTryToCreateOneInvalidBook() throws Exception {
+        BookRequestDTO bookRequest = BookRequestDTO.builder()
+                .title(null).author(null).isbn(null).build();
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post(BOOK_URI)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(bookRequest));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(3)));
     }
 
 }
