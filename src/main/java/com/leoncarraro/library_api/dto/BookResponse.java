@@ -10,14 +10,14 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-public class BookResponseDTO {
+public class BookResponse {
 
     private Long id;
     private String title;
     private String author;
     private String isbn;
 
-    public BookResponseDTO(Book book) {
+    public BookResponse(Book book) {
         id = book.getId();
         title = book.getTitle();
         author = book.getAuthor();

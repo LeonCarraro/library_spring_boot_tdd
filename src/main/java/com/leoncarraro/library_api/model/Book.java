@@ -1,6 +1,6 @@
 package com.leoncarraro.library_api.model;
 
-import com.leoncarraro.library_api.dto.BookRequestDTO;
+import com.leoncarraro.library_api.dto.BookRequest;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,7 +24,7 @@ public class Book {
     private String author;
     private String isbn;
 
-    public Book(BookRequestDTO bookRequest) {
+    public Book(BookRequest bookRequest) {
         id = null;
         title = bookRequest.getTitle();
         author = bookRequest.getAuthor();

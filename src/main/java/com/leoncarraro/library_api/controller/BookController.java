@@ -1,7 +1,7 @@
 package com.leoncarraro.library_api.controller;
 
-import com.leoncarraro.library_api.dto.BookRequestDTO;
-import com.leoncarraro.library_api.dto.BookResponseDTO;
+import com.leoncarraro.library_api.dto.BookRequest;
+import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.service.BookService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +19,13 @@ public class BookController {
     private final BookService bookService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
-    public ResponseEntity<BookResponseDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<BookResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.findById(id));
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<BookResponseDTO> create(@RequestBody @Valid BookRequestDTO bookRequest) {
-        BookResponseDTO bookResponse = bookService.create(bookRequest);
+    public ResponseEntity<BookResponse> create(@RequestBody @Valid BookRequest bookRequest) {
+        BookResponse bookResponse = bookService.create(bookRequest);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -33,6 +33,12 @@ public class BookController {
                 .toUri();
 
         return ResponseEntity.created(location).body(bookResponse);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        bookService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

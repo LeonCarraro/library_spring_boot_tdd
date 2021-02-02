@@ -1,7 +1,7 @@
 package com.leoncarraro.library_api.service;
 
-import com.leoncarraro.library_api.dto.BookRequestDTO;
-import com.leoncarraro.library_api.dto.BookResponseDTO;
+import com.leoncarraro.library_api.dto.BookRequest;
+import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.model.Book;
 import com.leoncarraro.library_api.repository.BookRepository;
 import com.leoncarraro.library_api.service.exception.ExistingBookException;
@@ -33,14 +33,14 @@ public class BookServiceTest {
     @Test
     @DisplayName(value = "Should save a Book successfully")
     public void shouldSaveBookSuccessfully() {
-        BookRequestDTO bookRequest = BookRequestDTO.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
         Book savedBook = Book.builder()
                 .id(1L).title("Title").author("Author").isbn("ISBN").build();
 
         Mockito.when(bookRepository.save(Mockito.any(Book.class))).thenReturn(savedBook);
 
-        BookResponseDTO bookResponse = bookService.create(bookRequest);
+        BookResponse bookResponse = bookService.create(bookRequest);
 
         Assertions.assertThat(bookResponse.getId()).isEqualTo(1L);
         Assertions.assertThat(bookResponse.getTitle()).isEqualTo("Title");
@@ -51,7 +51,7 @@ public class BookServiceTest {
     @Test
     @DisplayName(value = "Should throw an ExistingBookException when try create a Book with existing ISBN")
     public void shouldThrowAnExceptionWhenCreateBookWithExistingIsbn() {
-        BookRequestDTO bookRequest = BookRequestDTO.builder()
+        BookRequest bookRequest = BookRequest.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
 
         Mockito.when(bookRepository.existsByIsbn(bookRequest.getIsbn())).thenReturn(true);
