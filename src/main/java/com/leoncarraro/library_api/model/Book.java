@@ -3,6 +3,10 @@ package com.leoncarraro.library_api.model;
 import com.leoncarraro.library_api.dto.BookRequestDTO;
 import lombok.*;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "tb_book")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -11,6 +15,8 @@ import lombok.*;
 @AllArgsConstructor
 public class Book {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
 
