@@ -59,6 +59,7 @@ public class BookServiceTest {
         Assertions.assertThatExceptionOfType(ExistingBookException.class)
                 .isThrownBy(() -> bookService.create(bookRequest))
                 .withMessage("ISBN: ISBN already registered!");
+        Mockito.verify(bookRepository, Mockito.never()).save(Mockito.any(Book.class));
     }
 
 }
