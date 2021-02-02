@@ -4,6 +4,7 @@ import com.leoncarraro.library_api.dto.BookRequestDTO;
 import com.leoncarraro.library_api.dto.BookResponseDTO;
 import com.leoncarraro.library_api.model.Book;
 import com.leoncarraro.library_api.repository.BookRepository;
+import com.leoncarraro.library_api.service.exception.ExistingBookException;
 import com.leoncarraro.library_api.service.impl.BookServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,19 @@ public class BookServiceTest {
         Assertions.assertThat(bookResponse.getTitle()).isEqualTo("Title");
         Assertions.assertThat(bookResponse.getAuthor()).isEqualTo("Author");
         Assertions.assertThat(bookResponse.getIsbn()).isEqualTo("ISBN");
+    }
+
+    @Test
+    @DisplayName(value = "Should throw a ExistingBookException when try create a Book with existing ISBN")
+    public void shouldThrowAnExceptionWhenTryToCreateABookWithExistingIsbn() {
+        BookRequestDTO bookRequest = BookRequestDTO.builder()
+                .title("Title").author("Author").isbn("ISBN").build();
+
+        Mockito.when(bookRepository.existsByIsbn(bookRequest.getIsbn())).thenReturn(true);
+
+        Assertions.assertThatExceptionOfType(ExistingBookException.class)
+                .isThrownBy(() -> bookService.create(bookRequest))
+                .withMessage("ISBN: ISBN already registered!");
     }
 
 }
