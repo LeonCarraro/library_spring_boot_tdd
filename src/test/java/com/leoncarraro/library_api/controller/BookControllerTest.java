@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leoncarraro.library_api.dto.BookRequestDTO;
 import com.leoncarraro.library_api.dto.BookResponseDTO;
 import com.leoncarraro.library_api.service.BookService;
+import com.leoncarraro.library_api.service.exception.ExistingBookException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,28 @@ public class BookControllerTest {
         mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(3)));
+    }
+
+    @Test
+    @DisplayName(value = "Should verify that the request response is a " +
+            "Bad Request when try to create a Book with existing ISBN")
+    public void test() throws Exception {
+        BookRequestDTO bookRequest = BookRequestDTO.builder()
+                .title("Title").author("Author").isbn("ISBN").build();
+
+        BDDMockito.given(bookService.create(Mockito.any(BookRequestDTO.class)))
+                .willThrow(new ExistingBookException("ISBN: ISBN already registered!"));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post(BOOK_URI)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(bookRequest));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value("ISBN: ISBN already registered!"));
     }
 
 }

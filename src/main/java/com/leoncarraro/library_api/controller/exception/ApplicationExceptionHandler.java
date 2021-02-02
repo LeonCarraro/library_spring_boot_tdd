@@ -1,5 +1,6 @@
 package com.leoncarraro.library_api.controller.exception;
 
+import com.leoncarraro.library_api.service.exception.ExistingBookException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +20,12 @@ public class ApplicationExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
+        return ResponseEntity.badRequest().body(new StandardError(errors));
+    }
+
+    @ExceptionHandler(value = {ExistingBookException.class})
+    public ResponseEntity<StandardError> existingBookExceptionHandler(ExistingBookException ex) {
+        List<String> errors = List.of(ex.getMessage());
         return ResponseEntity.badRequest().body(new StandardError(errors));
     }
 
