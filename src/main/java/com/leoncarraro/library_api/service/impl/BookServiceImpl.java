@@ -16,6 +16,11 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
+    public BookResponseDTO findById(Long id) {
+        return null;
+    }
+
+    @Override
     public BookResponseDTO create(BookRequestDTO bookRequest) {
         String isbn = bookRequest.getIsbn();
 

@@ -5,6 +5,7 @@ import com.leoncarraro.library_api.dto.BookRequestDTO;
 import com.leoncarraro.library_api.dto.BookResponseDTO;
 import com.leoncarraro.library_api.service.BookService;
 import com.leoncarraro.library_api.service.exception.ExistingBookException;
+import com.leoncarraro.library_api.service.exception.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,9 +57,9 @@ public class BookControllerTest {
         mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(1L))
-                .andExpect(MockMvcResultMatchers.jsonPath("title").value(bookRequest.getTitle()))
-                .andExpect(MockMvcResultMatchers.jsonPath("author").value(bookRequest.getAuthor()))
-                .andExpect(MockMvcResultMatchers.jsonPath("isbn").value(bookRequest.getIsbn()))
+                .andExpect(MockMvcResultMatchers.jsonPath("title").value("Title"))
+                .andExpect(MockMvcResultMatchers.jsonPath("author").value("Author"))
+                .andExpect(MockMvcResultMatchers.jsonPath("isbn").value("ISBN"))
                 .andExpect(MockMvcResultMatchers.header().string("Location", "http://localhost/api/books/1"));
     }
 
@@ -100,6 +101,42 @@ public class BookControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value("ISBN: ISBN already registered!"));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a Ok status with response body when get a Book information correctly")
+    public void shouldReturnOkStatus_WhenGetBookInformation() throws Exception {
+        BookResponseDTO bookResponse = BookResponseDTO.builder()
+                .id(1L).author("Author").title("Title").isbn("ISBN").build();
+
+        BDDMockito.given(bookService.findById(1L)).willReturn(bookResponse);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get(BOOK_URI + "/1")
+                .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1L))
+                .andExpect(MockMvcResultMatchers.jsonPath("title").value("Title"))
+                .andExpect(MockMvcResultMatchers.jsonPath("author").value("Author"))
+                .andExpect(MockMvcResultMatchers.jsonPath("isbn").value("ISBN"));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a Not Found status with error message " +
+            "when get a Book information with no existent ID")
+    public void shouldReturnNotFoundStatus_WhenGetBookInformationWithNoExistentId() throws Exception {
+        BDDMockito.given(bookService.findById(1L)).willThrow(new ResourceNotFoundException("Book 1 not found!"));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get(BOOK_URI + "/1")
+                .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value("Book 1 not found!"));
     }
 
 }
