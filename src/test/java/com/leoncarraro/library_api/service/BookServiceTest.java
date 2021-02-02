@@ -32,7 +32,7 @@ public class BookServiceTest {
 
     @Test
     @DisplayName(value = "Should save a Book successfully")
-    public void shouldSaveABookSuccessfully() {
+    public void shouldSaveBookSuccessfully() {
         BookRequestDTO bookRequest = BookRequestDTO.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
         Book savedBook = Book.builder()
@@ -49,8 +49,8 @@ public class BookServiceTest {
     }
 
     @Test
-    @DisplayName(value = "Should throw a ExistingBookException when try create a Book with existing ISBN")
-    public void shouldThrowAnExceptionWhenTryToCreateABookWithExistingIsbn() {
+    @DisplayName(value = "Should throw an ExistingBookException when try create a Book with existing ISBN")
+    public void shouldThrowAnExceptionWhenCreateBookWithExistingIsbn() {
         BookRequestDTO bookRequest = BookRequestDTO.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
 

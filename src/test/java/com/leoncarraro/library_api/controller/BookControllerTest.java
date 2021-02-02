@@ -38,8 +38,8 @@ public class BookControllerTest {
     private BookService bookService;
 
     @Test
-    @DisplayName(value = "Should create one Book successfully")
-    public void shouldCreateOneBookSuccessfully() throws Exception {
+    @DisplayName(value = "Should return Created status with response body and correct Location header")
+    public void shouldReturnCreatedStatus_WhenSaveValidBook() throws Exception {
         BookRequestDTO bookRequest = BookRequestDTO.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
         BookResponseDTO bookResponse = BookResponseDTO.builder()
@@ -63,8 +63,9 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName(value = "Should throw an exception when try to create one invalid Book")
-    public void shouldThrowAnExceptionWhenTryToCreateOneInvalidBook() throws Exception {
+    @DisplayName(value = "Should throw a MethodArgumentNotValidException with errors message " +
+            "when try to create one Book with invalid properties")
+    public void shouldThrowAnException_WhenCreateBookWithInvalidProperties() throws Exception {
         BookRequestDTO bookRequest = BookRequestDTO.builder()
                 .title(null).author(null).isbn(null).build();
 
@@ -80,9 +81,9 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName(value = "Should verify that the request response is a " +
-            "Bad Request when try to create a Book with existing ISBN")
-    public void test() throws Exception {
+    @DisplayName(value = "Should return a Bad Request status with error message " +
+            "when try to create a Book with existing ISBN")
+    public void shouldReturnBadRequestStatus_WhenSaveBookWithExistingIsbn() throws Exception {
         BookRequestDTO bookRequest = BookRequestDTO.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
 

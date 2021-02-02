@@ -25,9 +25,7 @@ public class BookServiceImpl implements BookService {
 
         Book book = new Book(bookRequest);
         book = bookRepository.save(book);
-
-        return BookResponseDTO.builder()
-                .id(book.getId()).title(book.getTitle()).author(book.getAuthor()).isbn(book.getIsbn()).build();
+        return new BookResponseDTO(book);
     }
 
 }
