@@ -1,7 +1,8 @@
 package com.leoncarraro.library_api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leoncarraro.library_api.dto.BookRequest;
+import com.leoncarraro.library_api.dto.BookRequestCreate;
+import com.leoncarraro.library_api.dto.BookRequestUpdate;
 import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.service.BookService;
 import com.leoncarraro.library_api.service.exception.ExistingBookException;
@@ -40,12 +41,12 @@ public class BookControllerTest {
     @Test
     @DisplayName(value = "Should return Created status with response body and correct Location header")
     public void shouldReturnCreatedStatus_WhenSaveValidBook() throws Exception {
-        BookRequest bookRequest = BookRequest.builder()
+        BookRequestCreate bookRequest = BookRequestCreate.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
         BookResponse bookResponse = BookResponse.builder()
                 .id(1L).title("Title").author("Author").isbn("ISBN").build();
 
-        Mockito.when(bookService.create(Mockito.any(BookRequest.class))).thenReturn(bookResponse);
+        Mockito.when(bookService.create(Mockito.any(BookRequestCreate.class))).thenReturn(bookResponse);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post(BOOK_URI)
@@ -66,7 +67,7 @@ public class BookControllerTest {
     @DisplayName(value = "Should throw a MethodArgumentNotValidException with errors message " +
             "when try to create one Book with invalid properties")
     public void shouldThrowAnException_WhenCreateBookWithInvalidProperties() throws Exception {
-        BookRequest bookRequest = BookRequest.builder()
+        BookRequestCreate bookRequest = BookRequestCreate.builder()
                 .title(null).author(null).isbn(null).build();
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -84,10 +85,10 @@ public class BookControllerTest {
     @DisplayName(value = "Should return a Bad Request status with error message " +
             "when try to create a Book with existing ISBN")
     public void shouldReturnBadRequestStatus_WhenSaveBookWithExistingIsbn() throws Exception {
-        BookRequest bookRequest = BookRequest.builder()
+        BookRequestCreate bookRequest = BookRequestCreate.builder()
                 .title("Title").author("Author").isbn("ISBN").build();
 
-        Mockito.when(bookService.create(Mockito.any(BookRequest.class)))
+        Mockito.when(bookService.create(Mockito.any(BookRequestCreate.class)))
                 .thenThrow(new ExistingBookException("ISBN: ISBN already registered!"));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -149,8 +150,7 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName(value = "Should return a Not Found status with error message" +
-            " when delete a Book with no existent ID")
+    @DisplayName(value = "Should return a Not Found status with error message when delete a Book with no existent ID")
     public void shouldReturnNotFoundStatus_WhenDeleteBookWithNoExistentId() throws Exception {
         Mockito.doThrow(new ResourceNotFoundException("Book 1 not found!")).when(bookService).delete(1L);
 
@@ -161,6 +161,70 @@ public class BookControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value("Book 1 not found!"));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a Ok status with response body when update the Book informations correctly")
+    public void shouldReturnOkStatus_WhenUpdateBook() throws Exception {
+        BookRequestUpdate bookRequest = BookRequestUpdate.builder()
+                .author("Author Update").title("Title Update").build();
+        BookResponse bookResponse = BookResponse.builder()
+                .id(1L).author("Author Update").title("Title Update").isbn("ISBN").build();
+
+        Mockito.when(bookService.update(Mockito.eq(1L), Mockito.any(BookRequestUpdate.class))).thenReturn(bookResponse);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .put(BOOK_URI + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(bookRequest));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(1L))
+                .andExpect(MockMvcResultMatchers.jsonPath("title").value("Title Update"))
+                .andExpect(MockMvcResultMatchers.jsonPath("author").value("Author Update"))
+                .andExpect(MockMvcResultMatchers.jsonPath("isbn").value("ISBN"));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a Not Found status with error message when update a Book with no existent ID")
+    public void shouldReturnNotFoundStatus_WhenUpdateBookWithNoExistentId() throws Exception {
+        BookRequestUpdate bookRequest = BookRequestUpdate.builder()
+                .author("Author Update").title("Title Update").build();
+
+        Mockito.when(bookService.update(Mockito.eq(1L), Mockito.any(BookRequestUpdate.class)))
+                .thenThrow(new ResourceNotFoundException("Book 1 not found!"));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .put(BOOK_URI + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(bookRequest));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value("Book 1 not found!"));
+    }
+
+    @Test
+    @DisplayName(value = "Should throw a MethodArgumentNotValidException with errors message " +
+            "when try to update one Book with invalid properties")
+    public void shouldThrowAnException_WhenUpdateBookWithInvalidProperties() throws Exception {
+        BookRequestUpdate bookRequest = BookRequestUpdate.builder()
+                .title(null).author(null).build();
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .put(BOOK_URI + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(bookRequest));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(2)));
+        Mockito.verify(bookService, Mockito.never()).update(Mockito.anyLong(), Mockito.any(BookRequestUpdate.class));
     }
 
 }

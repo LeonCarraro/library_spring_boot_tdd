@@ -1,6 +1,7 @@
 package com.leoncarraro.library_api.service.impl;
 
-import com.leoncarraro.library_api.dto.BookRequest;
+import com.leoncarraro.library_api.dto.BookRequestCreate;
+import com.leoncarraro.library_api.dto.BookRequestUpdate;
 import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.model.Book;
 import com.leoncarraro.library_api.repository.BookRepository;
@@ -21,7 +22,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse create(BookRequest bookRequest) {
+    public BookResponse create(BookRequestCreate bookRequest) {
         String isbn = bookRequest.getIsbn();
 
         if (bookRepository.existsByIsbn(isbn)) {
@@ -31,6 +32,11 @@ public class BookServiceImpl implements BookService {
         Book book = new Book(bookRequest);
         book = bookRepository.save(book);
         return new BookResponse(book);
+    }
+
+    @Override
+    public BookResponse update(Long id, BookRequestUpdate bookRequest) {
+        return null;
     }
 
     @Override

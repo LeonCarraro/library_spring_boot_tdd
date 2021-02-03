@@ -1,6 +1,7 @@
 package com.leoncarraro.library_api.controller;
 
-import com.leoncarraro.library_api.dto.BookRequest;
+import com.leoncarraro.library_api.dto.BookRequestCreate;
+import com.leoncarraro.library_api.dto.BookRequestUpdate;
 import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.service.BookService;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class BookController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<BookResponse> create(@RequestBody @Valid BookRequest bookRequest) {
+    public ResponseEntity<BookResponse> create(@RequestBody @Valid BookRequestCreate bookRequest) {
         BookResponse bookResponse = bookService.create(bookRequest);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -33,6 +34,12 @@ public class BookController {
                 .toUri();
 
         return ResponseEntity.created(location).body(bookResponse);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
+    public ResponseEntity<BookResponse> update(@PathVariable Long id,
+                                               @RequestBody @Valid BookRequestUpdate bookRequest) {
+        return ResponseEntity.ok(bookService.update(id, bookRequest));
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")

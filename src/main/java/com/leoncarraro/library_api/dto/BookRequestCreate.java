@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @Builder
-public class BookRequest {
+public class BookRequestCreate {
 
     @NotBlank(message = "Book Title cannot be null / empty")
     private String title;
