@@ -1,7 +1,6 @@
 package com.leoncarraro.library_api.service;
 
 import com.leoncarraro.library_api.dto.BookRequestCreate;
-import com.leoncarraro.library_api.dto.BookRequestUpdate;
 import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.model.Book;
 import com.leoncarraro.library_api.repository.BookRepository;
@@ -70,10 +69,9 @@ public class BookServiceTest {
     @DisplayName(value = "Should get one Book information correctly")
     public void shouldGetOneBookInformation() {
         Long id = 1L;
-        Optional<Book> book = Optional.of(Book.builder()
-                .id(id).author("Author").title("Title").isbn("ISBN").build());
+        Book book = Book.builder().id(id).author("Author").title("Title").isbn("ISBN").build();
 
-        Mockito.when(bookRepository.findById(id)).thenReturn(book);
+        Mockito.when(bookRepository.findById(id)).thenReturn(Optional.of(book));
 
         BookResponse bookResponse = bookService.findById(id);
 
@@ -91,7 +89,31 @@ public class BookServiceTest {
         Mockito.when(bookRepository.findById(id)).thenReturn(Optional.empty());
 
         Assertions.assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> bookService.findById(1L))
+                .isThrownBy(() -> bookService.findById(id))
+                .withMessage("Book not found! ID: 1");
+    }
+
+    @Test
+    @DisplayName(value = "Should delete one Book correctly")
+    public void shouldDeleteOneBook() {
+        Long id = 1L;
+
+        Mockito.when(bookRepository.existsById(id)).thenReturn(true);
+
+        bookService.delete(id);
+
+        Mockito.verify(bookRepository, Mockito.times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName(value = "Should throw a ResourceNotFoundException when delete one Book with no existent ID")
+    public void shouldThrowAnExceptionWhenDeleteOneBookWithNoExistentId() {
+        Long id = 1L;
+
+        Mockito.when(bookRepository.existsById(id)).thenReturn(false);
+
+        Assertions.assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> bookService.findById(id))
                 .withMessage("Book not found! ID: 1");
     }
 
