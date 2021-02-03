@@ -7,6 +7,7 @@ import com.leoncarraro.library_api.model.Book;
 import com.leoncarraro.library_api.repository.BookRepository;
 import com.leoncarraro.library_api.service.BookService;
 import com.leoncarraro.library_api.service.exception.ExistingBookException;
+import com.leoncarraro.library_api.service.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponse findById(Long id) {
-        return null;
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found! ID: " + id));
+
+        return new BookResponse(book);
     }
 
     @Override
