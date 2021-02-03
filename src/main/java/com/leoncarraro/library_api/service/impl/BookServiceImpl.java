@@ -9,6 +9,7 @@ import com.leoncarraro.library_api.service.BookService;
 import com.leoncarraro.library_api.service.exception.ExistingBookException;
 import com.leoncarraro.library_api.service.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +41,13 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponse update(Long id, BookRequestUpdate bookRequest) {
-        return null;
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found! ID: " + id));
+
+        BeanUtils.copyProperties(bookRequest, book);
+
+        book = bookRepository.save(book);
+        return new BookResponse(book);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.leoncarraro.library_api.service;
 
 import com.leoncarraro.library_api.dto.BookRequestCreate;
+import com.leoncarraro.library_api.dto.BookRequestUpdate;
 import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.model.Book;
 import com.leoncarraro.library_api.repository.BookRepository;
@@ -113,8 +114,44 @@ public class BookServiceTest {
         Mockito.when(bookRepository.existsById(id)).thenReturn(false);
 
         Assertions.assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> bookService.findById(id))
+                .isThrownBy(() -> bookService.delete(id))
                 .withMessage("Book not found! ID: 1");
+    }
+
+    @Test
+    @DisplayName(value = "Should update one Book correctly")
+    public void shouldUpdateOneBook() {
+        Long id = 1L;
+        Book book = Book.builder().id(id).author("Author").title("Title").isbn("ISBN").build();
+        BookRequestUpdate bookRequest = BookRequestUpdate.builder()
+                .author("Updated Author").title("Updated Title").build();
+
+        Book updatedBook = Book.builder()
+                .id(book.getId()).author(bookRequest.getAuthor()).title(bookRequest.getTitle()).isbn(book.getIsbn())
+                .build();
+
+        Mockito.when(bookRepository.findById(id)).thenReturn(Optional.of(book));
+        Mockito.when(bookRepository.save(Mockito.any(Book.class))).thenReturn(updatedBook);
+
+        BookResponse bookResponse = bookService.update(id, bookRequest);
+
+        Assertions.assertThat(bookResponse.getId()).isEqualTo(1L);
+        Assertions.assertThat(bookResponse.getTitle()).isEqualTo("Updated Title");
+        Assertions.assertThat(bookResponse.getAuthor()).isEqualTo("Updated Author");
+        Assertions.assertThat(bookResponse.getIsbn()).isEqualTo("ISBN");
+    }
+
+    @Test
+    @DisplayName(value = "Should throw a ResourceNotFoundException when update one Book with no existent ID")
+    public void shouldThrowAnExceptionWhenUpdateOneBookWithNoExistentId() {
+        Long id = 1L;
+
+        Mockito.when(bookRepository.findById(id)).thenReturn(Optional.empty());
+
+        Assertions.assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> bookService.update(id, Mockito.any(BookRequestUpdate.class)))
+                .withMessage("Book not found! ID: 1");
+        Mockito.verify(bookRepository, Mockito.times(0)).save(Mockito.any(Book.class));
     }
 
 }
