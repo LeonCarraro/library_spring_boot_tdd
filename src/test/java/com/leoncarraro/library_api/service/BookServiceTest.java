@@ -15,9 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(value = {SpringExtension.class})
@@ -152,6 +156,26 @@ public class BookServiceTest {
                 .isThrownBy(() -> bookService.update(id, Mockito.any(BookRequestUpdate.class)))
                 .withMessage("Book not found! ID: 1");
         Mockito.verify(bookRepository, Mockito.times(0)).save(Mockito.any(Book.class));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a Page of BookResponse")
+    public void shouldReturnPageOfBookResponse() {
+        List<Book> pageContent = List.of(
+                Book.builder().id(1L).title("Title").author("Author").isbn("ISBN").build());
+        PageRequest pageRequest = PageRequest.of(0, 12);
+        Page<Book> page = new PageImpl<>(pageContent, pageRequest, 1);
+
+        Mockito.when(bookRepository.findAllByTitleContainingAndAuthorContaining(
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(PageRequest.class)))
+                .thenReturn(page);
+
+        Page<BookResponse> pageResponse = bookService.findWithFilter("Title", "Author", pageRequest);
+
+        Assertions.assertThat(pageResponse.getTotalElements()).isEqualTo(1L);
+        Assertions.assertThat(pageResponse.getTotalPages()).isEqualTo(1L);
+        Assertions.assertThat(pageResponse.getPageable().getPageNumber()).isEqualTo(0L);
+        Assertions.assertThat(pageResponse.getPageable().getPageSize()).isEqualTo(12L);
     }
 
 }

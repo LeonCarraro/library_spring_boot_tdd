@@ -23,7 +23,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookResponse> findWithFilter(String title, String author, PageRequest pageRequest) {
-        return null;
+        return bookRepository.findAllByTitleContainingAndAuthorContaining(title, author, pageRequest)
+                .map(BookResponse::new);
     }
 
     @Override
