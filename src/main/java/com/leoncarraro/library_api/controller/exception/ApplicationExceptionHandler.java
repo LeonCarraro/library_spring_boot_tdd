@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-public class ApplicationExceptionHandler {
+public final class ApplicationExceptionHandler {
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     public ResponseEntity<StandardError> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex) {

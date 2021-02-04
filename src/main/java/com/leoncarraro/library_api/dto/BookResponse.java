@@ -4,18 +4,16 @@ import com.leoncarraro.library_api.model.Book;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 public class BookResponse {
 
-    private Long id;
-    private String title;
-    private String author;
-    private String isbn;
+    private final Long id;
+    private final String title;
+    private final String author;
+    private final String isbn;
 
     public BookResponse(Book book) {
         id = book.getId();
