@@ -10,6 +10,9 @@ import com.leoncarraro.library_api.service.exception.ExistingBookException;
 import com.leoncarraro.library_api.service.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +20,11 @@ import org.springframework.stereotype.Service;
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+
+    @Override
+    public Page<BookResponse> findWithFilter(String title, String author, PageRequest pageRequest) {
+        return null;
+    }
 
     @Override
     public BookResponse findById(Long id) {

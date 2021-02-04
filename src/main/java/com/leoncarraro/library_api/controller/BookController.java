@@ -5,6 +5,8 @@ import com.leoncarraro.library_api.dto.BookRequestUpdate;
 import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.service.BookService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,6 +20,17 @@ import java.net.URI;
 public class BookController {
 
     private final BookService bookService;
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<Page<BookResponse>> findWithFilter(
+            @RequestParam(value = "title") String title,
+            @RequestParam(value = "author") String author,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "12") Integer size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return ResponseEntity.ok(bookService.findWithFilter(title, author, pageRequest));
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     public ResponseEntity<BookResponse> findById(@PathVariable Long id) {

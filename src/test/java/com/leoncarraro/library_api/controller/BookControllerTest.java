@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -23,6 +26,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
 
 @ExtendWith(value = {SpringExtension.class})
 @ActiveProfiles(value = "test")
@@ -225,6 +230,29 @@ public class BookControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(2)));
         Mockito.verify(bookService, Mockito.never()).update(Mockito.anyLong(), Mockito.any(BookRequestUpdate.class));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a Ok status with response body when request a pagination of Books")
+    public void shouldReturnOkStatus_WhenRequestPaginationOfBooks() throws Exception {
+        BookResponse bookResponse = BookResponse.builder()
+                .id(1L).author("Author").isbn("ISBN").title("Title").build();
+
+        Mockito.when(bookService.findWithFilter(
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(PageRequest.class)))
+                .thenReturn(new PageImpl<>(List.of(bookResponse), PageRequest.of(0, 12), 1L));
+
+        String queryString = String.format("?title=%s&author=%s&page=0&size=12", "Author", "Title");
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get(BOOK_URI + queryString)
+                .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("totalElements").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("pageable.pageSize").value(12))
+                .andExpect(MockMvcResultMatchers.jsonPath("pageable.pageNumber").value(0));
     }
 
 }
