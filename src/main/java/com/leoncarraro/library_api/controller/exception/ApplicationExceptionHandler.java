@@ -1,7 +1,9 @@
 package com.leoncarraro.library_api.controller.exception;
 
+import com.leoncarraro.library_api.service.exception.BookAlreadyOnLoanException;
 import com.leoncarraro.library_api.service.exception.ExistingBookException;
 import com.leoncarraro.library_api.service.exception.ResourceNotFoundException;
+import com.leoncarraro.library_api.service.exception.ResourceNotRegisteredException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,18 @@ public final class ApplicationExceptionHandler {
 
     @ExceptionHandler(value = {ExistingBookException.class})
     public ResponseEntity<StandardError> existingBookExceptionHandler(ExistingBookException ex) {
+        List<String> errors = List.of(ex.getMessage());
+        return ResponseEntity.badRequest().body(new StandardError(errors));
+    }
+
+    @ExceptionHandler(value = {BookAlreadyOnLoanException.class})
+    public ResponseEntity<StandardError> bookAlreadyOnLoanExceptionHandler(BookAlreadyOnLoanException ex) {
+        List<String> errors = List.of(ex.getMessage());
+        return ResponseEntity.badRequest().body(new StandardError(errors));
+    }
+
+    @ExceptionHandler(value = {ResourceNotRegisteredException.class})
+    public ResponseEntity<StandardError> resourceNotRegisteredExceptionHandler(ResourceNotRegisteredException ex) {
         List<String> errors = List.of(ex.getMessage());
         return ResponseEntity.badRequest().body(new StandardError(errors));
     }

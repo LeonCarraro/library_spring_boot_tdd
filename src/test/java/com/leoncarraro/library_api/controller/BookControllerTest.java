@@ -10,7 +10,6 @@ import com.leoncarraro.library_api.service.exception.ResourceNotFoundException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -28,9 +26,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-@ExtendWith(value = {SpringExtension.class})
 @ActiveProfiles(value = "test")
-@WebMvcTest
+@WebMvcTest(controllers = {BookController.class})
 @AutoConfigureMockMvc
 public class BookControllerTest {
 
