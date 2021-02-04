@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -100,6 +102,67 @@ public class BookRepositoryTest {
         Book deletedBook = entityManager.find(Book.class, persistedBook.getId());
 
         Assertions.assertThat(deletedBook).isNull();
+    }
+
+    @Test
+    @DisplayName(value = "Should get a Page of Books when search by title only")
+    public void shouldGetPageOfBookWhenSearchByTitleOnly() {
+        entityManager.persist(Book.builder().id(null).title("Title 1").author("Author 1").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Title 2").author("Author 2").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Book 1").author("Author 3").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Book 2").author("Author 4").isbn("ISBN").build());
+
+        Page<Book> page = bookRepository.findAllByTitleContainingAndAuthorContaining(
+                "Title", "", PageRequest.of(0, 12));
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(2L);
+        Assertions.assertThat(page.getContent().get(0).getTitle()).isEqualTo("Title 1");
+        Assertions.assertThat(page.getContent().get(1).getTitle()).isEqualTo("Title 2");
+    }
+
+    @Test
+    @DisplayName(value = "Should get a Page of Books when search by author only")
+    public void shouldGetPageOfBookWhenSearchByAuthorOnly() {
+        entityManager.persist(Book.builder().id(null).title("Title 1").author("Author 1").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Title 2").author("Author 2").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Book 1").author("Book Author 3").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Book 2").author("Book Author 4").isbn("ISBN").build());
+
+        Page<Book> page = bookRepository.findAllByTitleContainingAndAuthorContaining(
+                "", "Book", PageRequest.of(0, 12));
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(2L);
+        Assertions.assertThat(page.getContent().get(0).getTitle()).isEqualTo("Book 1");
+        Assertions.assertThat(page.getContent().get(1).getTitle()).isEqualTo("Book 2");
+    }
+
+    @Test
+    @DisplayName(value = "Should return a empty Page of Book")
+    public void shouldReturnEmptyPageOfBook() {
+        entityManager.persist(Book.builder().id(null).title("Title 1").author("Author 1").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Title 2").author("Author 2").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Book 1").author("Book Author 3").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Book 2").author("Book Author 4").isbn("ISBN").build());
+
+        Page<Book> page = bookRepository.findAllByTitleContainingAndAuthorContaining(
+                "Book Title", "Book Author", PageRequest.of(0, 12));
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName(value = "Should return 2 pages of Book")
+    public void shouldReturnTwoPagesOfBook() {
+        entityManager.persist(Book.builder().id(null).title("Title 1").author("Author 1").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Title 2").author("Author 2").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Title 3").author("Author 3").isbn("ISBN").build());
+        entityManager.persist(Book.builder().id(null).title("Title 4").author("Author 4").isbn("ISBN").build());
+
+        Page<Book> page = bookRepository.findAllByTitleContainingAndAuthorContaining(
+                "Title", "", PageRequest.of(0, 1));
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(4L);
+        Assertions.assertThat(page.getTotalPages()).isEqualTo(4L);
     }
 
 }

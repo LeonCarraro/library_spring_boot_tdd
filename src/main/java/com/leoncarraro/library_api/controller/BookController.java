@@ -23,8 +23,8 @@ public class BookController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<Page<BookResponse>> findWithFilter(
-            @RequestParam(value = "title") String title,
-            @RequestParam(value = "author") String author,
+            @RequestParam(value = "title", defaultValue = "") String title,
+            @RequestParam(value = "author", defaultValue = "") String author,
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "12") Integer size
     ) {
