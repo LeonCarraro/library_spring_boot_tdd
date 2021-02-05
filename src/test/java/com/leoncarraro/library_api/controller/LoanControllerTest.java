@@ -1,6 +1,7 @@
 package com.leoncarraro.library_api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.leoncarraro.library_api.dto.BookResponse;
 import com.leoncarraro.library_api.dto.LoanRequestCreate;
 import com.leoncarraro.library_api.dto.LoanResponse;
 import com.leoncarraro.library_api.service.LoanService;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @ActiveProfiles(value = "test")
@@ -43,7 +45,11 @@ public class LoanControllerTest {
             "with the Loan information on response body and the Location header when POST one Loan")
     public void shouldReturnCreatedStatus_WhenPostOneLoan() throws Exception {
         LoanRequestCreate loanRequest = LoanRequestCreate.builder().isbn("ISBN").customer("Customer").build();
-        LoanResponse loanResponse = LoanResponse.builder().id(1L).isbn("ISBN").customer("Customer").build();
+
+        BookResponse bookResponse = BookResponse.builder()
+                .id(1L).author("Author").title("Title").isbn("ISBN").build();
+        LoanResponse loanResponse = LoanResponse.builder()
+                .id(1L).customer("Customer").loanDate(LocalDate.now()).book(bookResponse).isReturned(false).build();
 
         Mockito.when(loanService.create(Mockito.any(LoanRequestCreate.class))).thenReturn(loanResponse);
 
@@ -56,8 +62,11 @@ public class LoanControllerTest {
         mvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(1L))
-                .andExpect(MockMvcResultMatchers.jsonPath("isbn").value("ISBN"))
                 .andExpect(MockMvcResultMatchers.jsonPath("customer").value("Customer"))
+                .andExpect(MockMvcResultMatchers.jsonPath("loanDate", Matchers.notNullValue(LocalDate.class)))
+                .andExpect(MockMvcResultMatchers.jsonPath("book", Matchers.notNullValue(BookResponse.class)))
+                .andExpect(MockMvcResultMatchers.jsonPath("book.id").value(1L))
+                .andExpect(MockMvcResultMatchers.jsonPath("isReturned").value(false))
                 .andExpect(MockMvcResultMatchers.header().string("Location", "http://localhost/api/loans/1"));
     }
 
@@ -102,8 +111,8 @@ public class LoanControllerTest {
 
     @Test
     @DisplayName(value = "Should return a 400 Bad Request status with the errors message on response body " +
-            "when POST one Loan with an no existent ISBN")
-    public void shouldReturnBadRequestStatus_WhenPostOneLoanWithNoExistentIsbn() throws Exception {
+            "when POST one Loan with no existent Book ISBN")
+    public void shouldReturnBadRequestStatus_WhenPostOneLoanWithNoExistentBookIsbn() throws Exception {
         LoanRequestCreate loanRequest = LoanRequestCreate.builder().isbn("ISBN").customer("Customer").build();
 
         Mockito.when(loanService.create(Mockito.any(LoanRequestCreate.class)))
@@ -125,7 +134,10 @@ public class LoanControllerTest {
     @DisplayName(value = "Should return a 200 Ok status with Loan informations on response body " +
             "when GET one Page of Loans")
     public void shouldReturnOkStatus_WhenGetPageOfLoan() throws Exception {
-        LoanResponse loanResponse = LoanResponse.builder().id(1L).isbn("ISBN").customer("Customer").build();
+        BookResponse bookResponse = BookResponse.builder()
+                .id(1L).author("Author").title("Title").isbn("ISBN").build();
+        LoanResponse loanResponse = LoanResponse.builder()
+                .id(1L).customer("Customer").loanDate(LocalDate.now()).book(bookResponse).isReturned(false).build();
 
         Mockito.when(loanService.findWithFilter(
                 Mockito.anyString(), Mockito.anyString(), Mockito.any(PageRequest.class)))
