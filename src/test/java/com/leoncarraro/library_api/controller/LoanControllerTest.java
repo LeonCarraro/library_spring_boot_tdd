@@ -14,12 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
 
 @ActiveProfiles(value = "test")
 @WebMvcTest(controllers = {LoanController.class})
@@ -115,6 +119,30 @@ public class LoanControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value("Book not registered! ISBN: 'ISBN'"));
+    }
+
+    @Test
+    @DisplayName(value = "Should return a 200 Ok status with Loan informations on response body " +
+            "when GET one Page of Loans")
+    public void shouldReturnOkStatus_WhenGetPageOfLoan() throws Exception {
+        LoanResponse loanResponse = LoanResponse.builder().id(1L).isbn("ISBN").customer("Customer").build();
+
+        Mockito.when(loanService.findWithFilter(
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(PageRequest.class)))
+                .thenReturn(new PageImpl<>(List.of(loanResponse), PageRequest.of(0, 12), 1L));
+
+        String queryString = String.format("?isbn=%s&customer=%s&page=0&size=12", "ISBN", "Customer");
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get(LOAN_URI + queryString)
+                .accept(MediaType.APPLICATION_JSON);
+
+        mvc.perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("content", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("numberOfElements").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("totalElements").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("pageable.pageSize").value(12))
+                .andExpect(MockMvcResultMatchers.jsonPath("pageable.pageNumber").value(0));
     }
 
 }
